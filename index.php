@@ -536,7 +536,7 @@ $announcement = getSetting('announcement_text', '');
         </a>
     </div>
 
-    <div class="footer">© 2026 <strong><?= htmlspecialchars($siteTitle) ?></strong> — Made with ❤️ in Việt Nam</div>
+    <div class="footer">© 2026 <strong><?= htmlspecialchars($siteTitle) ?></strong> — Design by Le The Khoi</div>
 
     <div class="toast success" id="toast"></div>
 
