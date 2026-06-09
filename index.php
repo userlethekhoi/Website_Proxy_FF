@@ -343,7 +343,7 @@ $announcement = getSetting('announcement_text', '');
             -webkit-backdrop-filter: blur(16px);
             display: flex; align-items: center; justify-content: center;
             z-index: 9500;
-            padding: 20px;
+            padding: 16px;
             opacity: 0; visibility: hidden;
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -353,7 +353,7 @@ $announcement = getSetting('announcement_text', '');
             border: 1px solid var(--border);
             border-radius: 24px;
             padding: 32px 24px;
-            width: 100%; max-width: 380px;
+            width: calc(100% - 32px); max-width: 380px;
             text-align: center;
             box-shadow: var(--shadow);
             transform: scale(0.95);
@@ -370,7 +370,7 @@ $announcement = getSetting('announcement_text', '');
             margin: 0 auto 16px;
         }
         .terms-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 12px; }
-        .terms-text { font-size: 13px; color: var(--text2); line-height: 1.6; text-align: justify; margin-bottom: 24px; }
+        .terms-text { font-size: 13px; color: var(--text2); line-height: 1.6; text-align: left; margin-bottom: 24px; }
         .terms-actions { display: flex; gap: 12px; }
         .terms-btn {
             flex: 1; padding: 12px 16px; border-radius: 12px;
@@ -381,6 +381,21 @@ $announcement = getSetting('announcement_text', '');
         .terms-btn.btn-accept:hover { background: rgba(255,255,255,0.9); transform: translateY(-1px); }
         .terms-btn.btn-decline { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); color: var(--text2); }
         .terms-btn.btn-decline:hover { background: rgba(255,255,255,0.06); color: var(--text); border-color: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+
+        @media (max-width: 400px) {
+            .terms-actions {
+                flex-direction: column-reverse;
+                gap: 8px;
+            }
+            .terms-btn {
+                width: 100%;
+            }
+            .terms-modal-box {
+                padding: 24px 20px;
+            }
+            .title { font-size: 24px; }
+            .top-bar { padding: 12px 16px; }
+        }
     </style>
 </head>
 <body class="loading">
