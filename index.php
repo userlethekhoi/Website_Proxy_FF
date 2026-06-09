@@ -156,22 +156,85 @@ $announcement = getSetting('announcement_text', '');
             background: var(--surface);
             border: 1px solid var(--border);
             display: flex; justify-content: center; align-items: center;
-            font-size: 14px; color: var(--text2);
             transition: all 0.2s ease;
         }
-        .music-btn:hover { background: var(--surface2); color: var(--text); border-color: rgba(255, 255, 255, 0.15); }
-        .music-btn.playing { color: var(--text); border-color: rgba(255, 255, 255, 0.2); box-shadow: 0 0 15px rgba(255, 255, 255, 0.05); animation: spin 4s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .music-btn:hover { background: var(--surface2); border-color: rgba(255, 255, 255, 0.15); }
+        .music-btn.playing { border-color: rgba(255, 255, 255, 0.2); box-shadow: 0 0 15px rgba(255, 255, 255, 0.05); }
+        
+        .audio-waves {
+            display: flex;
+            align-items: flex-end;
+            gap: 2.5px;
+            width: 14px;
+            height: 12px;
+        }
+        .audio-waves span {
+            display: block;
+            width: 1.5px;
+            height: 100%;
+            background-color: var(--text2);
+            border-radius: 1px;
+            transition: height 0.2s ease, background-color 0.2s ease;
+        }
+        .music-btn.playing .audio-waves span {
+            background-color: var(--text);
+            animation: bounce 0.8s ease infinite alternate;
+        }
+        .music-btn.playing .audio-waves span:nth-child(1) { animation-delay: 0.1s; height: 30%; }
+        .music-btn.playing .audio-waves span:nth-child(2) { animation-delay: 0.3s; height: 65%; }
+        .music-btn.playing .audio-waves span:nth-child(3) { animation-delay: 0.0s; height: 85%; }
+        .music-btn.playing .audio-waves span:nth-child(4) { animation-delay: 0.2s; height: 45%; }
+
+        .music-btn:not(.playing) .audio-waves span:nth-child(1) { height: 35%; }
+        .music-btn:not(.playing) .audio-waves span:nth-child(2) { height: 55%; }
+        .music-btn:not(.playing) .audio-waves span:nth-child(3) { height: 45%; }
+        .music-btn:not(.playing) .audio-waves span:nth-child(4) { height: 25%; }
+
+        @keyframes bounce {
+            0% { height: 25%; }
+            100% { height: 100%; }
+        }
+
+        /* Cursor Glow Follower */
+        #cursor-glow {
+            position: fixed;
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.035) 0%, transparent 70%);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            top: -9999px; left: -9999px;
+            transition: opacity 0.5s ease;
+            opacity: 0;
+        }
+        body:hover #cursor-glow { opacity: 1; }
+
+        /* Staggered load animations */
+        @keyframes revealUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal {
+            opacity: 0;
+            animation: revealUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .reveal-1 { animation-delay: 0.05s; }
+        .reveal-2 { animation-delay: 0.12s; }
+        .reveal-3 { animation-delay: 0.18s; }
+        .reveal-4 { animation-delay: 0.24s; }
+        .reveal-5 { animation-delay: 0.3s; }
+        .reveal-6 { animation-delay: 0.36s; }
+        .reveal-7 { animation-delay: 0.42s; }
+        .reveal-8 { animation-delay: 0.48s; }
+        .reveal-9 { animation-delay: 0.54s; }
 
         /* Profile Container */
         .profile-container {
             max-width: 440px; width: 100%; text-align: center;
             padding: 110px 20px 40px;
-            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            position: relative;
+            z-index: 2;
         }
 
         .avatar-wrap { position: relative; width: 100px; margin: 0 auto 24px; }
@@ -399,6 +462,7 @@ $announcement = getSetting('announcement_text', '');
     </style>
 </head>
 <body class="loading">
+    <div id="cursor-glow"></div>
 
     <div id="introSplash">
         <div class="splash-inner">
@@ -435,20 +499,25 @@ $announcement = getSetting('announcement_text', '');
             <?= htmlspecialchars($siteTitle) ?>
         </span>
         <div class="music-btn" id="musicToggle">
-            <i class="bi bi-music-note"></i>
+            <div class="audio-waves">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
     </div>
 
     <div class="profile-container">
-        <div class="avatar-wrap">
+        <div class="avatar-wrap reveal reveal-1">
             <div class="avatar"><img src="logo.png" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>
         </div>
 
-        <h1 class="title"><?= htmlspecialchars($siteTitle) ?></h1>
-        <p class="subtitle"><?= htmlspecialchars($siteSubtitle) ?></p>
+        <h1 class="title reveal reveal-2"><?= htmlspecialchars($siteTitle) ?></h1>
+        <p class="subtitle reveal reveal-3"><?= htmlspecialchars($siteSubtitle) ?></p>
 
         <?php if ($isLoggedIn): ?>
-            <div class="user-info">
+            <div class="user-info reveal reveal-4">
                 <span class="user-pill">👤 <?= htmlspecialchars($_SESSION["username"]) ?></span>
                 <a href="dashboard.php" class="user-pill">📊 Dashboard</a>
                 <?php if (isAdmin()): ?>
@@ -457,26 +526,32 @@ $announcement = getSetting('announcement_text', '');
                 <a href="logout.php" class="user-pill">Thoát</a>
             </div>
         <?php else: ?>
-            <div class="user-info">
-                <a href="login.php" class="user-pill">Đăng Nhập</a>
+            <div class="user-info reveal reveal-4">
+                <a href="login.php" class="user-pill" style="background:var(--accent);color:#000;font-weight:700;border-color:var(--accent);">🚀 BẮT ĐẦU CHƠI</a>
                 <a href="register.php" class="user-pill">Đăng Ký</a>
+            </div>
+            <div class="reveal reveal-5" style="margin:12px 0;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-align:left;font-size:12px;color:var(--text2);line-height:1.8;">
+                <strong style="color:var(--text);">📱 Cách chơi (3 bước):</strong><br>
+                ❶ <strong>Đăng nhập/Đăng ký</strong> → Vào Dashboard<br>
+                ❷ <strong>Cài Proxy</strong> iPhone: WiFi → Manual → <code style="color:var(--accent);">ioscrux.com:8082</code><br>
+                ❸ <strong>Chọn aimbot mode</strong> → Vào game bắn!
             </div>
         <?php endif; ?>
 
         <?php if ($maintenanceMode === "1"): ?>
-            <div class="maintenance-overlay">
+            <div class="maintenance-overlay reveal reveal-5">
                 Hệ thống đang trong chế độ bảo trì. Một số tính năng có thể không khả dụng.
             </div>
         <?php endif; ?>
 
         <?php if (!empty($announcement)): ?>
-            <div class="announcement">📢 <?= htmlspecialchars($announcement) ?></div>
+            <div class="announcement reveal reveal-5">📢 <?= htmlspecialchars($announcement) ?></div>
         <?php endif; ?>
 
-        <div class="section-label">Proxy</div>
+        <div class="section-label reveal reveal-5">Proxy</div>
 
         <?php if ($isLoggedIn): ?>
-            <a href="api/mobileconfig.php" class="link-card proxy-featured">
+            <a href="api/mobileconfig.php" class="link-card proxy-featured reveal reveal-6">
                 <div class="card-icon"><i class="bi bi-download"></i></div>
                 <div class="card-body">
                     <div class="card-title">CÀI ĐẶT PROXY</div>
@@ -485,7 +560,7 @@ $announcement = getSetting('announcement_text', '');
                 <i class="bi bi-arrow-right card-arrow"></i>
             </a>
         <?php else: ?>
-            <a href="login.php" class="link-card proxy-featured" onclick="showToast('Vui lòng đăng nhập để tải cấu hình proxy.', false)">
+            <a href="login.php" class="link-card proxy-featured reveal reveal-6" onclick="showToast('Vui lòng đăng nhập để tải cấu hình proxy.', false)">
                 <div class="card-icon"><i class="bi bi-download"></i></div>
                 <div class="card-body">
                     <div class="card-title">CÀI ĐẶT PROXY</div>
@@ -495,9 +570,9 @@ $announcement = getSetting('announcement_text', '');
             </a>
         <?php endif; ?>
 
-        <div class="section-label">Hướng Dẫn & Sửa Lỗi</div>
+        <div class="section-label reveal reveal-7">Hướng Dẫn & Sửa Lỗi</div>
 
-        <a href="<?= htmlspecialchars($videoGuideUrl) ?>" class="link-card" target="_blank">
+        <a href="<?= htmlspecialchars($videoGuideUrl) ?>" class="link-card reveal reveal-8" target="_blank">
             <div class="card-icon"><i class="bi bi-play-fill"></i></div>
             <div class="card-body">
                 <div class="card-title">CÁCH CÀI ĐẶT PROXY</div>
@@ -506,7 +581,7 @@ $announcement = getSetting('announcement_text', '');
             <i class="bi bi-arrow-right card-arrow"></i>
         </a>
 
-        <a href="<?= htmlspecialchars($videoFixUrl) ?>" class="link-card" target="_blank">
+        <a href="<?= htmlspecialchars($videoFixUrl) ?>" class="link-card reveal reveal-8" target="_blank">
             <div class="card-icon"><i class="bi bi-wrench"></i></div>
             <div class="card-body">
                 <div class="card-title">FIX LỖI 32MB & LOADING</div>
@@ -515,9 +590,9 @@ $announcement = getSetting('announcement_text', '');
             <i class="bi bi-arrow-right card-arrow"></i>
         </a>
 
-        <div class="section-label">Cộng Đồng</div>
+        <div class="section-label reveal reveal-9">Cộng Đồng</div>
 
-        <a href="<?= htmlspecialchars($telegramUrl) ?>" class="link-card" target="_blank">
+        <a href="<?= htmlspecialchars($telegramUrl) ?>" class="link-card reveal reveal-9" target="_blank">
             <div class="card-icon"><i class="bi bi-telegram"></i></div>
             <div class="card-body">
                 <div class="card-title">NHÓM TELEGRAM</div>
@@ -526,7 +601,7 @@ $announcement = getSetting('announcement_text', '');
             <i class="bi bi-arrow-right card-arrow"></i>
         </a>
 
-        <a href="<?= htmlspecialchars($discordUrl) ?>" class="link-card" target="_blank">
+        <a href="<?= htmlspecialchars($discordUrl) ?>" class="link-card reveal reveal-9" target="_blank">
             <div class="card-icon"><i class="bi bi-discord"></i></div>
             <div class="card-body">
                 <div class="card-title">BOX DISCORD</div>
@@ -536,7 +611,7 @@ $announcement = getSetting('announcement_text', '');
         </a>
     </div>
 
-    <div class="footer">© 2026 <strong><?= htmlspecialchars($siteTitle) ?></strong> — Design by Le The Khoi</div>
+    <div class="footer reveal reveal-9">© 2026 <strong><?= htmlspecialchars($siteTitle) ?></strong> — Design by Le The Khoi</div>
 
     <div class="toast success" id="toast"></div>
 
@@ -551,6 +626,13 @@ $announcement = getSetting('announcement_text', '');
                     document.getElementById("termsModal").classList.add("show");
                 }
             }, 1500);
+
+            // Cursor glow follower
+            const glow = document.getElementById("cursor-glow");
+            document.addEventListener("mousemove", (e) => {
+                glow.style.left = e.clientX + "px";
+                glow.style.top = e.clientY + "px";
+            });
         });
 
         document.getElementById("btnAccept").addEventListener("click", () => {
@@ -568,16 +650,15 @@ $announcement = getSetting('announcement_text', '');
         function tryAutoplay() {
             music.play().then(() => {
                 musicBtn.classList.add("playing");
-                musicBtn.innerHTML = '<i class="bi bi-disc"></i>';
             }).catch(() => {});
         }
         tryAutoplay();
 
         function unmuteOnInteraction() {
             if (music.paused) {
-                music.play();
-                musicBtn.classList.add("playing");
-                musicBtn.innerHTML = '<i class="bi bi-disc"></i>';
+                music.play().then(() => {
+                    musicBtn.classList.add("playing");
+                }).catch(() => {});
             }
             document.removeEventListener("click", unmuteOnInteraction);
             document.removeEventListener("touchstart", unmuteOnInteraction);
@@ -588,18 +669,16 @@ $announcement = getSetting('announcement_text', '');
         musicBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             if (music.paused) {
-                music.play();
-                musicBtn.classList.add("playing");
-                musicBtn.innerHTML = '<i class="bi bi-disc"></i>';
+                music.play().then(() => {
+                    musicBtn.classList.add("playing");
+                }).catch(() => {});
             } else {
                 music.pause();
                 musicBtn.classList.remove("playing");
-                musicBtn.innerHTML = '<i class="bi bi-music-note"></i>';
             }
         });
 
         // Notification Toast function
-
         function showToast(message, success = true) {
             const toast = document.getElementById("toast");
             toast.innerText = message;
