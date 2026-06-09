@@ -526,7 +526,7 @@ $announcement = getSetting('announcement_text', '');
     <div class="toast success" id="toast"></div>
 
     <script>
-        window.addEventListener("load", () => {
+        document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => {
                 document.getElementById("introSplash").classList.add("hide");
                 document.body.classList.remove("loading");
