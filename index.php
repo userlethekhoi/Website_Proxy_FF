@@ -334,6 +334,53 @@ $announcement = getSetting('announcement_text', '');
         @media (min-width: 600px) {
             .title { font-size: 32px; }
         }
+
+        /* Terms Modal */
+        .terms-modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9500;
+            padding: 20px;
+            opacity: 0; visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .terms-modal-overlay.show { opacity: 1; visibility: visible; }
+        .terms-modal-box {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px 24px;
+            width: 100%; max-width: 380px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transform: scale(0.95);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .terms-modal-overlay.show .terms-modal-box { transform: scale(1); }
+        .terms-icon {
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: var(--accent);
+            margin: 0 auto 16px;
+        }
+        .terms-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 12px; }
+        .terms-text { font-size: 13px; color: var(--text2); line-height: 1.6; text-align: justify; margin-bottom: 24px; }
+        .terms-actions { display: flex; gap: 12px; }
+        .terms-btn {
+            flex: 1; padding: 12px 16px; border-radius: 12px;
+            font-size: 13px; font-weight: 600; text-align: center; cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .terms-btn.btn-accept { background: #fff; color: #000; }
+        .terms-btn.btn-accept:hover { background: rgba(255,255,255,0.9); transform: translateY(-1px); }
+        .terms-btn.btn-decline { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); color: var(--text2); }
+        .terms-btn.btn-decline:hover { background: rgba(255,255,255,0.06); color: var(--text); border-color: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
     </style>
 </head>
 <body class="loading">
@@ -345,6 +392,21 @@ $announcement = getSetting('announcement_text', '');
             <h1 class="splash-title">Proxy Free Fire</h1>
             <p class="splash-sub">Đang khởi động...</p>
             <div class="splash-loader"><span></span></div>
+        </div>
+    </div>
+
+    <!-- Terms Modal -->
+    <div id="termsModal" class="terms-modal-overlay">
+        <div class="terms-modal-box">
+            <div class="terms-icon"><i class="bi bi-shield-lock-fill"></i></div>
+            <h2 class="terms-title">Điều Khoản & Chính Sách</h2>
+            <p class="terms-text">
+                Vui lòng chấp nhận điều khoản và chính sách bảo mật trước khi dùng sản phẩm của chúng tôi. Chúng tôi không chịu trách nhiệm với các hành vi sử dụng sản phẩm của chúng tôi dưới các hình thức vi phạm pháp luật. Mọi người dùng sử dụng sản phẩm của chúng tôi đều phải tự chịu trách nhiệm cho hành vi của mình, chúng tôi cam kết không chống phá nhà nước hay vi phạm pháp luật.
+            </p>
+            <div class="terms-actions">
+                <button class="terms-btn btn-decline" id="btnDecline">Từ chối</button>
+                <button class="terms-btn btn-accept" id="btnAccept">Đồng ý & Tiếp tục</button>
+            </div>
         </div>
     </div>
 
@@ -468,7 +530,21 @@ $announcement = getSetting('announcement_text', '');
             setTimeout(() => {
                 document.getElementById("introSplash").classList.add("hide");
                 document.body.classList.remove("loading");
+
+                // Show terms modal after loading finishes if not accepted before
+                if (!localStorage.getItem("terms_accepted")) {
+                    document.getElementById("termsModal").classList.add("show");
+                }
             }, 1500);
+        });
+
+        document.getElementById("btnAccept").addEventListener("click", () => {
+            localStorage.setItem("terms_accepted", "true");
+            document.getElementById("termsModal").classList.remove("show");
+        });
+
+        document.getElementById("btnDecline").addEventListener("click", () => {
+            window.location.href = "https://www.google.com";
         });
 
         const music = document.getElementById("bg-music");
