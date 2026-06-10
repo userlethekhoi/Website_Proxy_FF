@@ -494,11 +494,21 @@ $siteTitle = getSetting('site_title', 'Proxy Free Fire');
                             </ol>
                             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                                 <a href="/api/ca-cert.pem" class="user-pill" style="font-size: 11px; padding: 6px 12px;"><i class="bi bi-file-earmark-lock-fill"></i> CA Certificate</a>
-                                <a href="api/mobileconfig.php" class="user-pill" style="font-size: 11px; padding: 6px 12px; background: rgba(255,255,255,0.04);"><i class="bi bi-download"></i> Proxy Config</a>
+                            </div>
+                            <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px;">
+                                <span style="font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase;">Tải cấu hình Proxy tự động (.mobileconfig):</span>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
+                                    <a href="api/mobileconfig.php?port=8082" class="user-pill" style="font-size: 10px; padding: 6px 8px; justify-content: center; background: rgba(255,255,255,0.02);"><i class="bi bi-download"></i> Cổng 8082 (Normal)</a>
+                                    <a href="api/mobileconfig.php?port=8083" class="user-pill" style="font-size: 10px; padding: 6px 8px; justify-content: center; background: rgba(239,68,68,0.04); color: #ef4444; border-color: rgba(239,68,68,0.15);"><i class="bi bi-download"></i> Cổng 8083 (Head)</a>
+                                    <a href="api/mobileconfig.php?port=8084" class="user-pill" style="font-size: 10px; padding: 6px 8px; justify-content: center; background: rgba(245,158,11,0.04); color: #f59e0b; border-color: rgba(245,158,11,0.15);"><i class="bi bi-download"></i> Cổng 8084 (Neck)</a>
+                                    <a href="api/mobileconfig.php?port=8085" class="user-pill" style="font-size: 10px; padding: 6px 8px; justify-content: center; background: rgba(16,185,129,0.04); color: #10b981; border-color: rgba(16,185,129,0.15);"><i class="bi bi-download"></i> Cổng 8085 (Body)</a>
+                                    <a href="api/mobileconfig.php?port=8086" class="user-pill" style="font-size: 10px; padding: 6px 8px; justify-content: center; background: rgba(236,72,153,0.04); color: #ec4899; border-color: rgba(236,72,153,0.15);"><i class="bi bi-download"></i> Cổng 8086 (Lock)</a>
+                                    <a href="api/mobileconfig.php?port=8087" class="user-pill" style="font-size: 10px; padding: 6px 8px; justify-content: center; background: rgba(139,92,246,0.04); color: #a78bfa; border-color: rgba(139,92,246,0.15);"><i class="bi bi-download"></i> Cổng 8087 (Drag)</a>
+                                </div>
                             </div>
                         </div>
                         <div style="padding: 12px; background: rgba(245, 158, 11, 0.02); border: 1px solid rgba(245, 158, 11, 0.08); border-radius: 12px; font-size: 11px; color: var(--warn); line-height: 1.6;">
-                            ⚠️ <strong>Chú ý:</strong> Đảm bảo bạn bật Certificate Trust Settings để tránh gặp lỗi bảo mật SSL khi duyệt game.
+                            ⚠️ <strong>Chú ý:</strong> Đảm bảo bạn bật Certificate Trust Settings để tránh gặp lỗi bảo mật SSL khi duyệt game. Cổng proxy sẽ tương ứng với chức năng aimbot bạn muốn sử dụng.
                         </div>
                     </div>
                 </div>
@@ -514,7 +524,10 @@ $siteTitle = getSetting('site_title', 'Proxy Free Fire');
                         <input type="radio" name="policy" value="NORMAL" <?= $current_policy === 'NORMAL' ? 'checked' : '' ?> style="display: none;">
                         <div class="card-icon" style="color: var(--text3); border-color: rgba(255,255,255,0.04);"><i class="bi bi-x-circle-fill"></i></div>
                         <div class="card-body">
-                            <div class="card-title" style="font-size: 13px; font-weight: 700; color: var(--text3);">NORMAL</div>
+                            <div class="card-title" style="font-size: 13px; font-weight: 700; color: var(--text3); display: flex; justify-content: space-between; align-items: center;">
+                                <span>NORMAL</span>
+                                <span style="font-size: 10px; opacity: 0.8; font-weight: 500; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;">Cổng 8082</span>
+                            </div>
                             <div class="card-desc">Tắt aimbot, chuyển tiếp gói tin nguyên bản.</div>
                         </div>
                         <div class="policy-indicator"></div>
@@ -523,7 +536,10 @@ $siteTitle = getSetting('site_title', 'Proxy Free Fire');
                         <input type="radio" name="policy" value="AIM_HEAD" <?= $current_policy === 'AIM_HEAD' ? 'checked' : '' ?> style="display: none;">
                         <div class="card-icon" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.12); background: rgba(239, 68, 68, 0.02);"><i class="bi bi-crosshair"></i></div>
                         <div class="card-body">
-                            <div class="card-title" style="font-size: 13px; font-weight: 700; color: #ef4444;">🎯 AIM HEAD</div>
+                            <div class="card-title" style="font-size: 13px; font-weight: 700; color: #ef4444; display: flex; justify-content: space-between; align-items: center;">
+                                <span>🎯 AIM HEAD</span>
+                                <span style="font-size: 10px; opacity: 0.8; font-weight: 500; background: rgba(239,68,68,0.15); padding: 2px 6px; border-radius: 4px;">Cổng 8083</span>
+                            </div>
                             <div class="card-desc">Tự động ngắm vào đầu đối thủ. Tỉ lệ headshot cao nhất.</div>
                         </div>
                         <div class="policy-indicator"></div>
@@ -532,7 +548,10 @@ $siteTitle = getSetting('site_title', 'Proxy Free Fire');
                         <input type="radio" name="policy" value="AIM_NECK" <?= $current_policy === 'AIM_NECK' ? 'checked' : '' ?> style="display: none;">
                         <div class="card-icon" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.12); background: rgba(245, 158, 11, 0.02);"><i class="bi bi-shield-fill"></i></div>
                         <div class="card-body">
-                            <div class="card-title" style="font-size: 13px; font-weight: 700; color: #f59e0b;">🔫 AIM NECK</div>
+                            <div class="card-title" style="font-size: 13px; font-weight: 700; color: #f59e0b; display: flex; justify-content: space-between; align-items: center;">
+                                <span>🔫 AIM NECK</span>
+                                <span style="font-size: 10px; opacity: 0.8; font-weight: 500; background: rgba(245,158,11,0.15); padding: 2px 6px; border-radius: 4px;">Cổng 8084</span>
+                            </div>
                             <div class="card-desc">Ngắm vào cổ - cân bằng giữa sát thương và độ chính xác.</div>
                         </div>
                         <div class="policy-indicator"></div>
@@ -541,7 +560,10 @@ $siteTitle = getSetting('site_title', 'Proxy Free Fire');
                         <input type="radio" name="policy" value="AIM_BODY" <?= $current_policy === 'AIM_BODY' ? 'checked' : '' ?> style="display: none;">
                         <div class="card-icon" style="color: #10b981; border-color: rgba(16, 185, 129, 0.12); background: rgba(16, 185, 129, 0.02);"><i class="bi bi-shield-fill-check"></i></div>
                         <div class="card-body">
-                            <div class="card-title" style="font-size: 13px; font-weight: 700; color: #10b981;">🛡️ AIM BODY</div>
+                            <div class="card-title" style="font-size: 13px; font-weight: 700; color: #10b981; display: flex; justify-content: space-between; align-items: center;">
+                                <span>🛡️ AIM BODY</span>
+                                <span style="font-size: 10px; opacity: 0.8; font-weight: 500; background: rgba(16,185,129,0.15); padding: 2px 6px; border-radius: 4px;">Cổng 8085</span>
+                            </div>
                             <div class="card-desc">Ngắm vào thân - dễ trúng nhất, ít bị report.</div>
                         </div>
                         <div class="policy-indicator"></div>
@@ -550,7 +572,10 @@ $siteTitle = getSetting('site_title', 'Proxy Free Fire');
                         <input type="radio" name="policy" value="AIM_LOCK" <?= $current_policy === 'AIM_LOCK' ? 'checked' : '' ?> style="display: none;">
                         <div class="card-icon" style="color: #ec4899; border-color: rgba(236, 72, 153, 0.12); background: rgba(236, 72, 153, 0.02);"><i class="bi bi-lock-fill"></i></div>
                         <div class="card-body">
-                            <div class="card-title" style="font-size: 13px; font-weight: 700; color: #ec4899;">🔒 AIM LOCK</div>
+                            <div class="card-title" style="font-size: 13px; font-weight: 700; color: #ec4899; display: flex; justify-content: space-between; align-items: center;">
+                                <span>🔒 AIM LOCK</span>
+                                <span style="font-size: 10px; opacity: 0.8; font-weight: 500; background: rgba(236,72,153,0.15); padding: 2px 6px; border-radius: 4px;">Cổng 8086</span>
+                            </div>
                             <div class="card-desc">Khóa mục tiêu cứng - không giật, không tản đạn.</div>
                         </div>
                         <div class="policy-indicator"></div>
@@ -559,7 +584,10 @@ $siteTitle = getSetting('site_title', 'Proxy Free Fire');
                         <input type="radio" name="policy" value="AIM_DRAG" <?= $current_policy === 'AIM_DRAG' ? 'checked' : '' ?> style="display: none;">
                         <div class="card-icon" style="color: #8b5cf6; border-color: rgba(139, 92, 246, 0.12); background: rgba(139, 92, 246, 0.02);"><i class="bi bi-mouse3-fill"></i></div>
                         <div class="card-body">
-                            <div class="card-title" style="font-size: 13px; font-weight: 700; color: #8b5cf6;">🖱️ AIM DRAG</div>
+                            <div class="card-title" style="font-size: 13px; font-weight: 700; color: #8b5cf6; display: flex; justify-content: space-between; align-items: center;">
+                                <span>🖱️ AIM DRAG</span>
+                                <span style="font-size: 10px; opacity: 0.8; font-weight: 500; background: rgba(139,92,246,0.15); padding: 2px 6px; border-radius: 4px;">Cổng 8087</span>
+                            </div>
                             <div class="card-desc">Kéo tâm mượt về phía đối thủ - cực kì tự nhiên.</div>
                         </div>
                         <div class="policy-indicator"></div>

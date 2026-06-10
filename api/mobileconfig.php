@@ -24,9 +24,29 @@ if (!$license) {
 // Get system settings
 $proxyHost = getSetting('proxy_host', '127.0.0.1');
 $proxyPort = (int)getSetting('proxy_port', '9999');
-$sslPort = (int)getSetting('proxy_ssl_port', '8080');
+$sslPort = (int)getSetting('proxy_ssl_port', '8082'); // Default to NORMAL bypass port
 $siteTitle = getSetting('site_title', 'ProxyFF');
 $proxyVersion = getSetting('proxy_version', 'V1');
+
+// Resolve port based on query parameter
+$policyName = 'NORMAL';
+if (isset($_GET['port'])) {
+    $requestedPort = (int)$_GET['port'];
+    if ($requestedPort >= 8082 && $requestedPort <= 8087) {
+        $sslPort = $requestedPort;
+        
+        $policyMap = [
+            8082 => 'NORMAL',
+            8083 => 'AIM_HEAD',
+            8084 => 'AIM_NECK',
+            8085 => 'AIM_BODY',
+            8086 => 'AIM_LOCK',
+            8087 => 'AIM_DRAG'
+        ];
+        $policyName = $policyMap[$requestedPort];
+    }
+}
+$siteTitle = $siteTitle . ' (' . $policyName . ')';
 
 // Load CA certificate (mitmproxy)
 $caCertPath = __DIR__ . '/ca-cert.pem';
@@ -62,6 +82,13 @@ $caUUID = strtoupper(sprintf('%s-%s-%s-%s-%s',
     bin2hex(random_bytes(2)),
     bin2hex(random_bytes(6))
 ));
+$proxyUUID = strtoupper(sprintf('%s-%s-%s-%s-%s',
+    bin2hex(random_bytes(4)),
+    bin2hex(random_bytes(2)),
+    bin2hex(random_bytes(2)),
+    bin2hex(random_bytes(2)),
+    bin2hex(random_bytes(6))
+));
 
 $content = '<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -69,10 +96,31 @@ $content = '<?xml version="1.0" encoding="UTF-8"?>
 <dict>
     <key>PayloadContent</key>
     <array>
+        <!-- HTTP Proxy Settings -->
+        <dict>
+            <key>PayloadDisplayName</key>
+            <string>Proxy ' . $siteTitle . ' HTTP Proxy</string>
+            <key>PayloadIdentifier</key>
+            <string>com.' . strtolower($siteTitle) . '.proxy</string>
+            <key>PayloadType</key>
+            <string>com.apple.proxy.http.global</string>
+            <key>PayloadUUID</key>
+            <string>' . $proxyUUID . '</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>ProxyServer</key>
+            <string>' . $proxyHost . '</string>
+            <key>ProxyServerPort</key>
+            <integer>' . $sslPort . '</integer>
+            <key>ProxyType</key>
+            <string>Manual</string>
+            <key>ProxyCaptiveLoginAllowed</key>
+            <true/>
+        </dict>
         <!-- MITM SSL CA Certificate -->
         <dict>
             <key>PayloadDisplayName</key>
-            <string>' . $siteTitle . ' CA</string>
+            <string>' . $siteTitle . ' CA Certificate</string>
             <key>PayloadIdentifier</key>
             <string>com.' . strtolower($siteTitle) . '.ca</string>
             <key>PayloadType</key>

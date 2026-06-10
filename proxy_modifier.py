@@ -41,7 +41,8 @@ ASSETS_DIR = os.path.join(SCRIPT_DIR, "mod_assets")
 ASSET_REPLACEMENTS = {
     # Thay the file danh sach de game nap mod file tu proxy
     "assetindexer": os.path.join(ASSETS_DIR, "assetindexer.mod"),
-    "fileinfo": os.path.join(ASSETS_DIR, "fileinfo.txt"),
+    "fileinfo": os.path.join(ASSETS_DIR, "fileinfo_mod.txt"),
+    "gs_overwrite_weapon_config": os.path.join(ASSETS_DIR, "weapon_config.mod.gz"),
 }
 
 # ============================================================
@@ -74,10 +75,20 @@ GAME_API_PATTERNS = [
     "shoot", "hit", "aim", "recoil", "spread",
 ]
 
+# Ports map to aimbot policies
+PORT_POLICY_MAP = {
+    8082: "NORMAL",
+    8083: "AIM_HEAD",
+    8084: "AIM_NECK",
+    8085: "AIM_BODY",
+    8086: "AIM_LOCK",
+    8087: "AIM_DRAG"
+}
+
 # ============================================================
-# Policy Cache
+# Policy Cache (Active authorized client IPs)
 # ============================================================
-_policy_cache = {}
+_active_clients = set()
 _cache_lock = threading.Lock()
 _last_sync = 0
 SYNC_INTERVAL = 3
@@ -92,49 +103,89 @@ def _get_db_connection():
         return None
 
 
-def _load_policies():
-    global _policy_cache, _last_sync
+def _load_active_clients():
+    global _active_clients, _last_sync
     conn = _get_db_connection()
     if not conn:
         return
     try:
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT client_ip, routing_target FROM device_filters WHERE is_active = 1")
+        # Select active users with valid routing filters (registered devices)
+        cursor.execute("SELECT client_ip FROM device_filters WHERE is_active = 1")
         rows = cursor.fetchall()
-        new_cache = {}
-        for row in rows:
-            new_cache[row['client_ip']] = row['routing_target']
+        new_clients = set(row['client_ip'] for row in rows)
         cursor.close()
         with _cache_lock:
-            _policy_cache = new_cache
+            _active_clients = new_clients
             _last_sync = time.time()
-        ctx.log.info(f"[Aimbot] Synced {len(new_cache)} devices from DB")
+        ctx.log.info(f"[Aimbot] Synced {len(new_clients)} active clients from DB")
     except Error as e:
         ctx.log.error(f"[Aimbot] DB error: {e}")
     finally:
         conn.close()
 
 
-def _get_policy(client_ip: str) -> str:
+def _is_client_authorized(client_ip: str) -> bool:
     global _last_sync
     if time.time() - _last_sync > SYNC_INTERVAL:
-        _load_policies()
+        _load_active_clients()
     with _cache_lock:
-        return _policy_cache.get(client_ip, "NORMAL")
+        return client_ip in _active_clients
+
+
+_client_current_modes = {}
+_modes_lock = threading.Lock()
+
+
+def _update_client_policy_db(client_ip: str, mode: str):
+    conn = _get_db_connection()
+    if not conn:
+        return
+    try:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE device_filters SET routing_target = %s, updated_at = NOW() WHERE client_ip = %s", (mode, client_ip))
+        conn.commit()
+        cursor.close()
+    except Exception:
+        pass
+    finally:
+        conn.close()
+
+
+def _update_client_policy_async(client_ip: str, mode: str):
+    global _client_current_modes
+    with _modes_lock:
+        last_mode = _client_current_modes.get(client_ip)
+        if last_mode == mode:
+            return
+        _client_current_modes[client_ip] = mode
+    threading.Thread(target=_update_client_policy_db, args=(client_ip, mode), daemon=True).start()
 
 
 # ============================================================
 # ASSET REPLACEMENT — Primary Attack Mode
 # ============================================================
 def request(flow: http.HTTPFlow) -> None:
-    """Intercept requests. Try asset replacement first, then JSON modification."""
+    """Intercept requests. Resolve mode from port, check authorization."""
     client_ip = flow.client_conn.peername[0]
-    url = flow.request.pretty_url
-    mode = _get_policy(client_ip)
+    
+    # 1. Verify if client is authorized (active device license filter)
+    if not _is_client_authorized(client_ip):
+        return # Unlicensed or inactive device -> normal bypass
+
+    # 2. Get policy mode based on listening port
+    listen_port = flow.server_conn.address[1] if (flow.server_conn and flow.server_conn.address) else ctx.options.listen_port
+    if not listen_port:
+        listen_port = ctx.options.listen_port
+    mode = PORT_POLICY_MAP.get(listen_port, "NORMAL")
+
+    # Update active policy target in DB for monitoring status
+    _update_client_policy_async(client_ip, mode)
 
     if mode == "NORMAL":
         return
 
+    url = flow.request.pretty_url
     # --- MODE 1: Asset Replacement ---
     for pattern, local_path in ASSET_REPLACEMENTS.items():
         if pattern in url and os.path.exists(local_path):
@@ -218,7 +269,7 @@ def running():
         status = "[OK]" if os.path.exists(path) else "[MISSING]"
         ctx.log.info(f"[Aimbot]   {status} {pattern} -> {os.path.basename(path)}")
     ctx.log.info("=" * 60)
-    _load_policies()
+    _load_active_clients()
 
 
 def done():
